@@ -154,81 +154,89 @@
       opacity:.75;
     }
 
-    /* Messages */
-    .day{
-      display:flex;
-      justify-content:center;
-      margin:10px 0 12px;
-    }
-    .day span{
-      font-size:11px;
-      color:#555;
-      background:rgba(255,255,255,.75);
-      border:1px solid rgba(0,0,0,.08);
-      padding:5px 10px;
-      border-radius:999px;
-      backdrop-filter: blur(6px);
-    }
-    .msg{
-      display:flex;
-      margin:6px 0;
-    }
-    .msg.in{justify-content:flex-start}
-    .msg.out{justify-content:flex-end}
-    .bubble{
-      max-width:82%;
-      border-radius:16px;
-      padding:8px 10px;
-      box-shadow: 0 6px 16px rgba(0,0,0,.06);
-      border:1px solid rgba(0,0,0,.06);
-    }
-    .msg.in .bubble{background:var(--incoming)}
-    .msg.out .bubble{background:var(--outgoing)}
-    .meta{
-      display:flex;
-      gap:8px;
-      align-items:flex-end;
-      justify-content:space-between;
-      margin-top:6px;
-      color:#6b6b6b;
-      font-size:10.5px;
-    }
-    .sender{
-      font-size:11px;
-      font-weight:700;
-      color:#2a2a2a;
-      margin-bottom:4px;
-    }
-    .txt{
-      font-size:13px;
-      line-height:1.35;
-      white-space:pre-wrap;
-      word-break:break-word;
-    }
-    .attach{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      background:rgba(0,0,0,.04);
-      border:1px dashed rgba(0,0,0,.15);
-      padding:8px 10px;
-      border-radius:14px;
-    }
-    .ico{
-      width:28px;height:28px;border-radius:10px;
-      background:rgba(0,0,0,.08);
-      display:flex;align-items:center;justify-content:center;
-      font-size:14px;
-    }
-    audio { border-radius: 12px; }
-    .afile{font-size:12px;color:#222}
-    .atype{font-size:10.5px;color:#666;margin-top:2px}
-    .empty{
-      color:#777;
-      font-size:13px;
-      text-align:center;
-      padding:18px 10px;
-    }
+   /* Messages */
+.msg{ display:flex; margin:6px 0; }
+.msg.in{ justify-content:flex-start; }
+.msg.out{ justify-content:flex-end; }
+
+.bubble{
+  max-width: 78%;
+  padding: 7px 9px 6px;
+  border-radius: 8px;
+  position: relative;
+  border: 0;
+  box-shadow: 0 1px 1px rgba(0,0,0,.08);
+}
+
+.msg.in .bubble{
+  background:#fff;
+  border-top-left-radius: 4px;
+}
+.msg.out .bubble{
+  background:#d9fdd3; /* modern WA outgoing */
+  border-top-right-radius: 4px;
+}
+
+/* bubble tails */
+.msg.in .bubble::before{
+  content:"";
+  position:absolute;
+  left:-6px;
+  top:0;
+  width:0;height:0;
+  border-top: 10px solid #fff;
+  border-left: 10px solid transparent;
+}
+.msg.out .bubble::before{
+  content:"";
+  position:absolute;
+  right:-6px;
+  top:0;
+  width:0;height:0;
+  border-top: 10px solid #d9fdd3;
+  border-right: 10px solid transparent;
+}
+
+/* sender label (optional) */
+.sender{
+  font-size: 11px;
+  font-weight: 700;
+  color:#1f7a5a;
+  margin: 0 0 4px 0;
+}
+
+/* text */
+.txt{
+  font-size: 13.5px;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* bottom-right time like WhatsApp */
+.meta{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:4px;
+  font-size: 10.5px;
+  color: rgba(0,0,0,.45);
+}
+.meta .who{ display:none; } /* hide "You"/name like real WA */
+
+/* image in chat (no filename UI) */
+.imgmsg{
+  width: 100%;
+  display:block;
+  border-radius: 8px;
+}
+
+/* audio in chat (simple WhatsApp style) */
+.audiomsg{
+  width: 260px;
+  max-width: 100%;
+  height: 34px;
+}
   </style>
 </head>
 <body>
