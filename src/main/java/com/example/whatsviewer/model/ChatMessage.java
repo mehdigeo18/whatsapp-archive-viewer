@@ -1,27 +1,26 @@
 package com.example.whatsviewer.model;
 
-import java.time.LocalDateTime;
-
 public class ChatMessage {
-
-    private LocalDateTime timestamp;
+    private String timestamp;
     private String sender;
-    private String content;
+    private String text;
+    private boolean outgoing;
+    private String attachmentName;
 
     public ChatMessage() {}
 
-    public ChatMessage(LocalDateTime timestamp, String sender, String content) {
-        this.timestamp = timestamp;
-        this.sender = sender;
-        this.content = content;
-    }
-
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+    public String getTimestamp() { return timestamp; }
+    public void setTimestamp(String timestamp) { this.timestamp = timestamp; }
 
     public String getSender() { return sender; }
     public void setSender(String sender) { this.sender = sender; }
 
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
+    public String getText() { return text; }
+    public void setText(String text) { this.text = text; }
+
+    public boolean isOutgoing() { return outgoing; }
+    public void setOutgoing(boolean outgoing) { this.outgoing = outgoing; }
+
+    public String getAttachmentName() { return attachmentName; }
+    public void setAttachmentName(String attachmentName) { this.attachmentName = attachmentName; }
 }
