@@ -1,14 +1,10 @@
-# ---- Build stage ----
 FROM maven:3.9.8-eclipse-temurin-17 AS build
 WORKDIR /app
+
+# 1) Copy pom first and prefetch deps (cached layer)
 COPY pom.xml .
+RUN mvn -q -DskipTests dependency:go-offline
+
+# 2) Then copy sources and build
 COPY src ./src
 RUN mvn -q -DskipTests clean package
-
-# ---- Run stage ----
-FROM eclipse-temurin:17-jre
-WORKDIR /app
-COPY --from=build /app/target/*.jar /app/app.jar
-EXPOSE 8080
-ENV PORT=8080
-CMD ["java","-jar","/app/app.jar"]
