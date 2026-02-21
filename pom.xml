@@ -17,6 +17,7 @@
 
   <properties>
     <java.version>17</java.version>
+           <start-class>com.example.whatsviewer.WhatsViewerApplication</start-class>
   </properties>
 
   <dependencies>
@@ -32,16 +33,15 @@
     </dependency>
   </dependencies>
 
-  <build>
-    <finalName>app</finalName>
-    <plugins>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-        <configuration>
-          <mainClass>com.example.whatsviewer.WhatsViewerApplication</mainClass>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+ <build>
+  <plugins>
+    <plugin>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-maven-plugin</artifactId>
+      <configuration>
+        <mainClass>${start-class}</mainClass>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
 </project>
