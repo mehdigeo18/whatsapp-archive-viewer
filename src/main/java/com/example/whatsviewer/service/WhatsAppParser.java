@@ -23,10 +23,15 @@ public class WhatsAppParser {
      * [30/08/2023, 7:17:12 PM] Ali Mehdi: <attached: 00000003-PHOTO-...jpg>
      * Multi-line messages continue on subsequent lines until the next header line.
      */
-    private static final Pattern HEADER_PATTERN = Pattern.compile(
-            "^\u200e?\[(\d{1,2})/(\d{1,2})/(\d{2,4}),\s*([0-9:]+)\s*(AM|PM)\]\s*(.*?):\s*(.*)$",
-            Pattern.CASE_INSENSITIVE
-    );
+   // Example WhatsApp line formats:
+// 30/08/2023, 7:17 PM - Name: Hi
+// 30/08/2023, 19:17 - Name: Hi
+
+private static final Pattern LINE_PATTERN = Pattern.compile(
+        "^(\\d{1,2}[\\/\\-]\\d{1,2}[\\/\\-]\\d{2,4}),?\\s+" +        // date
+        "(\\d{1,2}:\\d{2})(?:\\s*(AM|PM))?\\s+-\\s+" +               // time + optional AM/PM
+        "([^:]+):\\s*(.*)$"                                         // sender + message
+);
 
     private static final Pattern ATTACH_PATTERN = Pattern.compile(
             "^<attached:\s*(.+?)>\s*$",
