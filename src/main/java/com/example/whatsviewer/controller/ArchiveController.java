@@ -25,12 +25,13 @@ public class ArchiveController {
             @RequestParam(value = "myName", required = false) String myName
     ) {
         try {
+            // parse messages
             UploadResponse res = parser.parse(file, myName);
 
+            // store zip bytes so MediaController can serve attachments
             String original = file.getOriginalFilename();
             if (original != null && original.toLowerCase().endsWith(".zip")) {
-                byte[] zipBytes = file.getBytes();
-                String uploadId = uploadStore.put(zipBytes, original);
+                String uploadId = uploadStore.put(file.getBytes(), original);
                 res.setUploadId(uploadId);
             } else {
                 res.setUploadId(null);
