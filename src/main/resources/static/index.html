@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>WhatsApp Archive Viewer</title>
+</head>
+<body>
+<h2>Upload WhatsApp TXT Export</h2>
+<input type="file" id="fileInput"/>
+<button onclick="upload()">Upload</button>
+<pre id="result"></pre>
+
+<script>
+async function upload(){
+  const file = document.getElementById('fileInput').files[0];
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch("/api/archive/upload", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+  document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+}
+</script>
+</body>
+</html>
