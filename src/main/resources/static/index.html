@@ -268,6 +268,17 @@
   border-radius:16px;
   box-shadow:0 1px 1px rgba(0,0,0,.08);
 }
+    .sysmsg {
+  max-width: 90%;
+  margin: 12px auto;
+  background: #fff3c4;
+  color: #5a4b00;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
   </style>
 </head>
 <body>
@@ -391,9 +402,15 @@ function mediaUrl(uploadId, name){
         lastDay = dayKey;
       }
 
-      const outgoing = !!m.outgoing;
+     const outgoing = !!m.outgoing;
 const side = outgoing ? "out" : "in";
 const sender = m.sender || "";
+
+// 👇 ADD THIS (very important)
+const text = m.text ? m.text.trim() : "";
+
+const attachName = m.attachmentName || "";
+const attachType = m.attachmentType || "";
 
 const rawText = (m.text == null) ? "" : String(m.text);
 const text = rawText.trim();
@@ -440,11 +457,20 @@ if (attachName) {
 if (text) {
   content += `<div class="txt">${esc(text)}</div>`;
 }
+      const isSystemMessage =
+  text.toLowerCase().includes("messages and calls are end-to-end encrypted");
 
 if (!content) {
   content = `<div class="txt" style="color:#777">(empty)</div>`;
 }
-
+if (isSystemMessage) {
+  html += `
+    <div class="sysmsg">
+      🔒 ${esc(text)}
+    </div>
+  `;
+  continue;
+}
      html += `
   <div class="msg ${side}">
     <div class="bubble">
