@@ -161,11 +161,13 @@
 
 .bubble{
   max-width: 78%;
-  padding: 7px 9px 6px;
-  border-radius: 8px;
+  padding:8px 10px;
+  border-radius:16px;
   position: relative;
   border: 0;
   box-shadow: 0 1px 1px rgba(0,0,0,.08);
+  max-width:82%;
+  overflow:visible;        /* IMPORTANT if you added overflow:hidden */
 }
 
 .msg.in .bubble{
@@ -207,10 +209,11 @@
 
 /* text */
 .txt{
-  font-size: 13.5px;
-  line-height: 1.35;
-  white-space: pre-wrap;
-  word-break: break-word;
+  font-size:14px;
+  line-height:1.35;
+  color:#111;              /* IMPORTANT */
+  white-space:pre-wrap;
+  word-break:break-word;
 }
 
 /* bottom-right time like WhatsApp */
@@ -388,21 +391,24 @@ function mediaUrl(uploadId, name){
       }
 
       const outgoing = !!m.outgoing;
-      const side = outgoing ? "out" : "in";
-      const sender = m.sender || "";
-      const text = (m.text ?? "").trim();
-      const attachName = m.attachmentName || "";
-      const attachType = m.attachmentType || "";
+const side = outgoing ? "out" : "in";
+const sender = m.sender || "";
 
-      // bubble content
-      let content = "";
+const rawText = (m.text == null) ? "" : String(m.text);
+const text = rawText.trim();
 
-      // sender label for incoming group messages (optional)
-      if(!outgoing && sender){
-        content += `<div class="sender">${esc(sender)}</div>`;
-      }
+const attachName = m.attachmentName || "";
+const attachType = m.attachmentType || "";
 
-     if (attachName) {
+// bubble content
+let content = "";
+
+// sender label for incoming group messages (optional)
+if (!outgoing && sender) {
+  content += `<div class="sender">${esc(sender)}</div>`;
+}
+
+if (attachName) {
   const upId = data?.uploadId || null;
   const url = mediaUrl(upId, attachName);
   const t = (attachType || "").toLowerCase();
@@ -410,14 +416,10 @@ function mediaUrl(uploadId, name){
   // If no url (user uploaded .txt), we can't serve media
   if (!url) {
     content += `<div class="txt">(attachment)</div>`;
-  }
-  else if (t === "image") {
+  } else if (t === "image") {
     // ✅ WhatsApp-like: just the image
-    content += `
-      <img class="imgmsg" src="${url}" alt="${esc(attachName)}" loading="lazy" />
-    `;
-  }
-  else if (t === "audio") {
+    content += `<img class="imgmsg" src="${url}" alt="" loading="lazy" />`;
+  } else if (t === "audio") {
     // ✅ WhatsApp-like: just the audio player
     content += `
       <audio class="audiomsg" controls preload="none">
@@ -425,14 +427,21 @@ function mediaUrl(uploadId, name){
         Your browser does not support audio playback.
       </audio>
     `;
-  }
-  else {
+  } else {
     // ✅ Anything else: simple "Open file" link (no filename shown)
     content += `<div class="txt"><a href="${url}" target="_blank" rel="noopener">Open file</a></div>`;
   }
 
   // optional spacing if message also has text
   if (text) content += `<div style="height:6px"></div>`;
+}
+
+if (text) {
+  content += `<div class="txt">${esc(text)}</div>`;
+}
+
+if (!content) {
+  content = `<div class="txt" style="color:#777">(empty)</div>`;
 }
 
      html += `
