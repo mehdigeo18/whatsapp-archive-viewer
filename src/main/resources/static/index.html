@@ -386,74 +386,38 @@ function mediaUrl(uploadId, name){
         content += `<div class="sender">${esc(sender)}</div>`;
       }
 
-     if(attachName){
-        const upId = data?.uploadId || null;
-        const url = mediaUrl(upId, attachName);
+     if (attachName) {
+  const upId = data?.uploadId || null;
+  const url = mediaUrl(upId, attachName);
+  const t = (attachType || "").toLowerCase();
 
-        // If user uploaded .txt (not .zip), uploadId will be null → show attachment card only
-        if(url && (attachType || "").toLowerCase() === "image"){
-          content += `
-            <div class="attach" style="display:block">
-              <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-                <div class="ico">🖼️</div>
-                <div>
-                  <div class="afile">${esc(attachName)}</div>
-                  <div class="atype">image</div>
-                </div>
-              </div>
-              <img
-                src="${url}"
-                alt="${esc(attachName)}"
-                style="width:100%;border-radius:12px;border:1px solid rgba(0,0,0,.08);display:block"
-                loading="lazy"
-              />
-            </div>
-          `;
-        } else if(url && (attachType || "").toLowerCase() === "audio"){
-          content += `
-            <div class="attach" style="display:block">
-              <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-                <div class="ico">🎤</div>
-                <div>
-                  <div class="afile">${esc(attachName)}</div>
-                  <div class="atype">audio</div>
-                </div>
-              </div>
-              <audio controls preload="none" style="width:100%;">
-                <source src="${url}" />
-                Your browser does not support audio playback.
-              </audio>
-            </div>
-          `;
-        } else {
-          // fallback: show as a file card (also clickable if url exists)
-          const linkStart = url ? `<a href="${url}" target="_blank" style="text-decoration:none;color:inherit">` : "";
-          const linkEnd = url ? `</a>` : "";
-          content += `
-            ${linkStart}
-            <div class="attach">
-              <div class="ico">${iconFor(attachType)}</div>
-              <div>
-                <div class="afile">${esc(attachName)}</div>
-                <div class="atype">${esc(attachType || "attachment")}${url ? " • open" : ""}</div>
-              </div>
-            </div>
-            ${linkEnd}
-          `;
-        }
+  // If no url (user uploaded .txt), we can't serve media
+  if (!url) {
+    content += `<div class="txt">(attachment)</div>`;
+  }
+  else if (t === "image") {
+    // ✅ WhatsApp-like: just the image
+    content += `
+      <img class="imgmsg" src="${url}" alt="${esc(attachName)}" loading="lazy" />
+    `;
+  }
+  else if (t === "audio") {
+    // ✅ WhatsApp-like: just the audio player
+    content += `
+      <audio class="audiomsg" controls preload="none">
+        <source src="${url}">
+        Your browser does not support audio playback.
+      </audio>
+    `;
+  }
+  else {
+    // ✅ Anything else: simple "Open file" link (no filename shown)
+    content += `<div class="txt"><a href="${url}" target="_blank" rel="noopener">Open file</a></div>`;
+  }
 
-        if(text){
-          content += `<div style="height:8px"></div>`;
-        }
-      }
-
-      if(text){
-        content += `<div class="txt">${esc(text)}</div>`;
-      }
-
-      if(!content){
-        content = `<div class="txt" style="color:#777">(empty)</div>`;
-      }
+  // optional spacing if message also has text
+  if (text) content += `<div style="height:6px"></div>`;
+}
 
      html += `
   <div class="msg ${side}">
