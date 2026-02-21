@@ -68,7 +68,7 @@ private static final Pattern HEADER_PATTERN = Pattern.compile(
                 String firstBody = hm.group(7) == null ? "" : hm.group(7).trim();
 
                 current = new ChatMessage();
-                current.setTimestamp(dateTime.toString());
+                current.setTimestamp(dateTime.format(TS_FORMAT));
                 current.setSender(sender);
                 current.setOutgoing(false); // set later in service when comparing names (optional)
 
