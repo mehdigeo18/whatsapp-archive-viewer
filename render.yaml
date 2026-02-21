@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: whatsapp-archive-viewer
-    runtime: docker
-    plan: free
-    region: frankfurt
-    autoDeploy: true
-    healthCheckPath: /
