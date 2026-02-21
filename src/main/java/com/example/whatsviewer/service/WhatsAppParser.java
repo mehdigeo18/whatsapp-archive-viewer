@@ -27,10 +27,10 @@ public class WhatsAppParser {
 // 30/08/2023, 7:17 PM - Name: Hi
 // 30/08/2023, 19:17 - Name: Hi
 
-private static final Pattern LINE_PATTERN = Pattern.compile(
-        "^(\\d{1,2}[\\/\\-]\\d{1,2}[\\/\\-]\\d{2,4}),?\\s+" +        // date
-        "(\\d{1,2}:\\d{2})(?:\\s*(AM|PM))?\\s+-\\s+" +               // time + optional AM/PM
-        "([^:]+):\\s*(.*)$"                                         // sender + message
+private static final Pattern HEADER_PATTERN = Pattern.compile(
+    "^(\\d{1,2}[\\/\\-]\\d{1,2}[\\/\\-]\\d{2,4}),?\\s+" +   // date
+    "(\\d{1,2}:\\d{2})(?:\\s*(AM|PM))?\\s+-\\s+" +          // time (+ optional AM/PM)
+    "([^:]+):\\s*(.*)$"                                     // sender: message
 );
 
     private static final Pattern ATTACH_PATTERN = Pattern.compile(
