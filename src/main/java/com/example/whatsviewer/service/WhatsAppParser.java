@@ -58,7 +58,12 @@ public class WhatsAppParser {
     }
 
     List<ChatMessage> messages = parseExportText(txt, myName);
-    return new UploadResponse(chatName, myName, messages);
+    UploadResponse res = new UploadResponse();
+res.setChatName(chatName);
+res.setMyName(myName);
+res.setMessages(messages);
+res.setTotalMessages(messages.size());
+return res;
   }
 
   private static Charset guessCharset(MultipartFile file) {
