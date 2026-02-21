@@ -48,9 +48,10 @@ public class MediaController {
 
                     String contentType = guessContentType(fileName);
                     return ResponseEntity.ok()
-                            .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                            .contentType(MediaType.parseMediaType(contentType))
-                            .body(bytes);
+        .header(HttpHeaders.CACHE_CONTROL, "no-store")
+        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName.replace("\"","") + "\"")
+        .contentType(MediaType.parseMediaType(contentType))
+        .body(bytes);
                 }
             }
         }
