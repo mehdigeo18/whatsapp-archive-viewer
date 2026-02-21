@@ -3,59 +3,459 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WhatsApp Archive Viewer (Demo API)</title>
+  <title>WhatsApp Archive Viewer</title>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f5f5f7}
-    .wrap{max-width:900px;margin:0 auto;padding:24px}
-    .card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
-    label{display:block;font-size:14px;color:#333;margin:12px 0 6px}
-    input[type="text"],input[type="file"]{width:100%;padding:10px;border:1px solid rgba(0,0,0,.18);border-radius:10px}
-    button{margin-top:14px;padding:10px 14px;border-radius:12px;border:0;background:#0071e3;color:#fff;font-weight:600;cursor:pointer}
-    pre{white-space:pre-wrap;background:#0b1020;color:#d7e0ff;border-radius:14px;padding:14px;overflow:auto}
-    .hint{color:#555;font-size:13px;line-height:1.45}
+    :root{
+      --bg:#f5f5f7;
+      --card:#ffffff;
+      --stroke:rgba(0,0,0,.12);
+      --text:#111;
+      --muted:#666;
+      --blue:#0071e3;
+      --incoming:#ffffff;
+      --outgoing:#dcf8c6;
+      --shadow:0 18px 50px rgba(0,0,0,.10);
+      --radius:18px;
+      --phoneW: 390px;
+      --phoneH: 760px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .wrap{max-width:1100px;margin:0 auto;padding:24px}
+    h1{margin:0 0 10px;font-size:28px;letter-spacing:-.02em}
+    .hint{margin:0 0 18px;color:var(--muted);line-height:1.5;font-size:13.5px}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr var(--phoneW);
+      gap:18px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns: 1fr; justify-items:center;}
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+    label{display:block;font-size:13px;color:#333;margin:12px 0 6px}
+    input[type="text"],input[type="file"]{
+      width:100%;
+      padding:10px 12px;
+      border:1px solid var(--stroke);
+      border-radius:12px;
+      outline:none;
+      background:#fff;
+    }
+    .row{display:flex; gap:10px; align-items:center; margin-top:14px; flex-wrap:wrap}
+    button{
+      padding:10px 14px;
+      border-radius:12px;
+      border:0;
+      background:var(--blue);
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+    }
+    button:disabled{opacity:.55; cursor:not-allowed}
+    .ghost{
+      background:transparent;
+      border:1px solid var(--stroke);
+      color:#111;
+      font-weight:600;
+    }
+    .status{margin-top:10px;font-size:13px;color:var(--muted)}
+    details{margin-top:12px}
+    pre{
+      white-space:pre-wrap;
+      background:#0b1020;
+      color:#d7e0ff;
+      border-radius:14px;
+      padding:14px;
+      overflow:auto;
+      max-height: 380px;
+    }
+
+    /* Phone mock */
+    .phone{
+      width:var(--phoneW);
+      height:var(--phoneH);
+      border-radius:36px;
+      background:#0d0d0f;
+      padding:12px;
+      box-shadow: 0 25px 70px rgba(0,0,0,.25);
+      position:sticky;
+      top:18px;
+    }
+    .screen{
+      width:100%;
+      height:100%;
+      border-radius:28px;
+      overflow:hidden;
+      background:#f2f2f2;
+      border:1px solid rgba(255,255,255,.08);
+      position:relative;
+    }
+    .topbar{
+      height:58px;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:0 14px;
+      border-bottom:1px solid rgba(0,0,0,.08);
+    }
+    .avatar{
+      width:34px;height:34px;border-radius:50%;
+      background:linear-gradient(135deg,#d9d9d9,#f1f1f1);
+      border:1px solid rgba(0,0,0,.06);
+      flex:0 0 auto;
+    }
+    .title{line-height:1.1}
+    .title b{display:block;font-size:14px}
+    .title span{display:block;font-size:12px;color:#777;margin-top:2px}
+    .chatbg{
+      position:absolute; inset:58px 0 54px 0;
+      overflow:auto;
+      padding:14px 12px;
+      background:
+        radial-gradient(circle at 20px 20px, rgba(0,0,0,.035) 2px, transparent 3px) 0 0/44px 44px,
+        radial-gradient(circle at 10px 10px, rgba(0,0,0,.02) 2px, transparent 3px) 0 0/28px 28px,
+        #f4f6f8;
+    }
+    .composer{
+      position:absolute; left:0; right:0; bottom:0;
+      height:54px;
+      background:#fff;
+      border-top:1px solid rgba(0,0,0,.08);
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:0 12px;
+    }
+    .pill{
+      flex:1;
+      height:34px;
+      border-radius:20px;
+      border:1px solid rgba(0,0,0,.10);
+      background:#fafafa;
+    }
+    .send{
+      width:34px;height:34px;border-radius:50%;
+      background:var(--blue);
+      opacity:.75;
+    }
+
+    /* Messages */
+    .day{
+      display:flex;
+      justify-content:center;
+      margin:10px 0 12px;
+    }
+    .day span{
+      font-size:11px;
+      color:#555;
+      background:rgba(255,255,255,.75);
+      border:1px solid rgba(0,0,0,.08);
+      padding:5px 10px;
+      border-radius:999px;
+      backdrop-filter: blur(6px);
+    }
+    .msg{
+      display:flex;
+      margin:6px 0;
+    }
+    .msg.in{justify-content:flex-start}
+    .msg.out{justify-content:flex-end}
+    .bubble{
+      max-width:82%;
+      border-radius:16px;
+      padding:8px 10px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.06);
+      border:1px solid rgba(0,0,0,.06);
+    }
+    .msg.in .bubble{background:var(--incoming)}
+    .msg.out .bubble{background:var(--outgoing)}
+    .meta{
+      display:flex;
+      gap:8px;
+      align-items:flex-end;
+      justify-content:space-between;
+      margin-top:6px;
+      color:#6b6b6b;
+      font-size:10.5px;
+    }
+    .sender{
+      font-size:11px;
+      font-weight:700;
+      color:#2a2a2a;
+      margin-bottom:4px;
+    }
+    .txt{
+      font-size:13px;
+      line-height:1.35;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+    .attach{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      background:rgba(0,0,0,.04);
+      border:1px dashed rgba(0,0,0,.15);
+      padding:8px 10px;
+      border-radius:14px;
+    }
+    .ico{
+      width:28px;height:28px;border-radius:10px;
+      background:rgba(0,0,0,.08);
+      display:flex;align-items:center;justify-content:center;
+      font-size:14px;
+    }
+    .afile{font-size:12px;color:#222}
+    .atype{font-size:10.5px;color:#666;margin-top:2px}
+    .empty{
+      color:#777;
+      font-size:13px;
+      text-align:center;
+      padding:18px 10px;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1 style="margin:0 0 12px">WhatsApp Archive Viewer (Backend Demo)</h1>
-    <p class="hint">Upload a <b>.txt</b> export or a <b>.zip</b> exported by WhatsApp (where the ZIP contains a .txt). This demo API returns parsed messages as JSON. Media binaries are not served in this backend demo (dev team can add later).</p>
+    <h1>WhatsApp Archive Viewer</h1>
+    <p class="hint">
+      Upload a WhatsApp <b>.txt</b> export or a <b>.zip</b> (ZIP must contain a .txt). This page renders the messages as a chat UI.
+    </p>
 
-    <div class="card">
-      <label>Your name (optional, for outgoing detection)</label>
-      <input id="myName" type="text" placeholder="e.g. Syed Ali" />
+    <div class="grid">
+      <!-- Controls -->
+      <div class="panel">
+        <label>Your name (optional, for outgoing detection)</label>
+        <input id="myName" type="text" placeholder="e.g. Ali Mehdi" />
 
-      <label>WhatsApp export (.txt or .zip)</label>
-      <input id="file" type="file" />
+        <label>WhatsApp export (.txt or .zip)</label>
+        <input id="file" type="file" />
 
-      <button id="btn">Upload & Parse</button>
+        <div class="row">
+          <button id="btn">Upload & Parse</button>
+          <button id="clear" class="ghost" type="button">Clear</button>
+        </div>
 
-      <div style="height:12px"></div>
-      <pre id="out">Waiting…</pre>
+        <div id="status" class="status">Waiting…</div>
+
+        <details>
+          <summary style="cursor:pointer; font-weight:600;">Raw JSON (debug)</summary>
+          <pre id="raw">—</pre>
+        </details>
+      </div>
+
+      <!-- Phone UI -->
+      <div class="phone" aria-label="chat preview">
+        <div class="screen">
+          <div class="topbar">
+            <div class="avatar"></div>
+            <div class="title">
+              <b id="chatTitle">Chat</b>
+              <span id="chatSub">Upload a .txt or .zip export</span>
+            </div>
+          </div>
+
+          <div id="chat" class="chatbg">
+            <div class="empty">Upload a file to preview messages here.</div>
+          </div>
+
+          <div class="composer">
+            <div class="pill"></div>
+            <div class="send"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
 <script>
   const btn = document.getElementById('btn');
-  const out = document.getElementById('out');
+  const clearBtn = document.getElementById('clear');
+  const statusEl = document.getElementById('status');
+  const rawEl = document.getElementById('raw');
+  const chatEl = document.getElementById('chat');
+  const chatTitle = document.getElementById('chatTitle');
+  const chatSub = document.getElementById('chatSub');
 
-  btn.addEventListener('click', async () => {
+  function esc(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function fmtDay(iso){
+    // iso: "2023-08-30T19:17:07"
+    try{
+      const d = new Date(iso);
+      return d.toLocaleDateString(undefined, { weekday:"short", year:"numeric", month:"short", day:"numeric" });
+    }catch(e){ return iso?.slice(0,10) || ""; }
+  }
+
+  function fmtTime(iso){
+    try{
+      const d = new Date(iso);
+      return d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" });
+    }catch(e){ return ""; }
+  }
+
+  function iconFor(type){
+    const t = (type||"").toLowerCase();
+    if(t.includes("image")) return "🖼️";
+    if(t.includes("audio")) return "🎤";
+    if(t.includes("video")) return "🎬";
+    return "📎";
+  }
+
+  function renderChat(data){
+    const messages = Array.isArray(data?.messages) ? data.messages : [];
+
+    chatTitle.textContent = data?.chatName || "Chat";
+    chatSub.textContent = messages.length ? `${messages.length} messages` : "No messages parsed (check export format)";
+
+    if(!messages.length){
+      chatEl.innerHTML = `<div class="empty">No messages found. Make sure your export looks like:<br><br>
+      <code>[30/08/2023, 7:17:07 PM] Name: Message</code></div>`;
+      return;
+    }
+
+    // Group by day
+    let html = "";
+    let lastDay = null;
+
+    for(const m of messages){
+      const ts = m.timestamp || m.time || m.dateTime || "";
+      const dayKey = ts ? String(ts).slice(0,10) : "unknown";
+      if(dayKey !== lastDay){
+        html += `<div class="day"><span>${esc(fmtDay(ts))}</span></div>`;
+        lastDay = dayKey;
+      }
+
+      const outgoing = !!m.outgoing;
+      const side = outgoing ? "out" : "in";
+      const sender = m.sender || "";
+      const text = (m.text ?? "").trim();
+      const attachName = m.attachmentName || "";
+      const attachType = m.attachmentType || "";
+
+      // bubble content
+      let content = "";
+
+      // sender label for incoming group messages (optional)
+      if(!outgoing && sender){
+        content += `<div class="sender">${esc(sender)}</div>`;
+      }
+
+      if(attachName){
+        content += `
+          <div class="attach">
+            <div class="ico">${iconFor(attachType)}</div>
+            <div>
+              <div class="afile">${esc(attachName)}</div>
+              <div class="atype">${esc(attachType || "attachment")}</div>
+            </div>
+          </div>
+        `;
+        if(text){
+          content += `<div style="height:8px"></div>`;
+        }
+      }
+
+      if(text){
+        content += `<div class="txt">${esc(text)}</div>`;
+      }
+
+      if(!content){
+        content = `<div class="txt" style="color:#777">(empty)</div>`;
+      }
+
+      html += `
+        <div class="msg ${side}">
+          <div class="bubble">
+            ${content}
+            <div class="meta">
+              <span>${outgoing ? "You" : esc(sender || "")}</span>
+              <span>${esc(fmtTime(ts))}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    chatEl.innerHTML = html;
+
+    // scroll to bottom
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  async function uploadAndParse(){
     const f = document.getElementById('file').files[0];
-    const myName = document.getElementById('myName').value;
-    if(!f){ out.textContent = 'Please choose a file first.'; return; }
+    const myName = document.getElementById('myName').value.trim();
+
+    if(!f){
+      statusEl.textContent = "Please choose a file first.";
+      return;
+    }
+
+    btn.disabled = true;
+    statusEl.textContent = "Uploading…";
 
     const fd = new FormData();
     fd.append('file', f);
     if(myName) fd.append('myName', myName);
 
-    out.textContent = 'Uploading…';
-    const res = await fetch('/api/upload', { method: 'POST', body: fd });
-    const text = await res.text();
+    try{
+      const res = await fetch('/api/upload', { method:'POST', body: fd });
+      const text = await res.text();
 
-    try {
-      out.textContent = JSON.stringify(JSON.parse(text), null, 2);
-    } catch(e){
-      out.textContent = text;
+      // raw debug
+      rawEl.textContent = text;
+
+      let data;
+      try{ data = JSON.parse(text); }
+      catch(e){
+        statusEl.textContent = "Server did not return JSON. See Raw JSON.";
+        chatEl.innerHTML = `<div class="empty">Unexpected response format. Open “Raw JSON (debug)”.</div>`;
+        return;
+      }
+
+      statusEl.textContent = `Done. Parsed ${data?.totalMessages ?? (data?.messages?.length ?? 0)} messages.`;
+      renderChat(data);
+    }catch(err){
+      statusEl.textContent = "Upload failed. Check Render logs.";
+      chatEl.innerHTML = `<div class="empty">Network/server error. Try again.</div>`;
+      rawEl.textContent = String(err);
+    }finally{
+      btn.disabled = false;
     }
+  }
+
+  btn.addEventListener('click', uploadAndParse);
+
+  clearBtn.addEventListener('click', () => {
+    document.getElementById('file').value = "";
+    rawEl.textContent = "—";
+    statusEl.textContent = "Cleared.";
+    chatTitle.textContent = "Chat";
+    chatSub.textContent = "Upload a .txt or .zip export";
+    chatEl.innerHTML = `<div class="empty">Upload a file to preview messages here.</div>`;
   });
 </script>
 </body>
