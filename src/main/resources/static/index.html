@@ -268,23 +268,6 @@
   border-radius:16px;
   box-shadow:0 1px 1px rgba(0,0,0,.08);
 }
-    .sysmsg {
-  max-width: 90%;
-  margin: 12px auto;
-  background: #fff3c4;
-  color: #5a4b00;
-  font-size: 12px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  text-align: center;
-  box-shadow: 0 1px 2px rgba(0,0,0,.05);
-}
-    .empty{
-  color:#777;
-  font-size:13px;
-  text-align:center;
-  padding:18px 10px;
-}
   </style>
 </head>
 <body>
@@ -408,85 +391,60 @@ function mediaUrl(uploadId, name){
         lastDay = dayKey;
       }
 
-    for (const m of messages) {
-  const ts = m.timestamp || m.time || m.dateTime || "";
-  const dayKey = ts ? String(ts).slice(0, 10) : "unknown";
+      const outgoing = !!m.outgoing;
+const side = outgoing ? "out" : "in";
+const sender = m.sender || "";
 
-  if (dayKey !== lastDay) {
-    html += `<div class="day"><span>${esc(fmtDay(ts))}</span></div>`;
-    lastDay = dayKey;
-  }
+const rawText = (m.text == null) ? "" : String(m.text);
+const text = rawText.trim();
 
-  const outgoing = !!m.outgoing;
-  const side = outgoing ? "out" : "in";
-  const sender = m.sender || "";
+const attachName = m.attachmentName || "";
+const attachType = m.attachmentType || "";
 
-  const rawText = (m.text == null) ? "" : String(m.text);
-  const text = rawText.trim();
+// bubble content
+let content = "";
 
-  const attachName = m.attachmentName || "";
-  const attachType = (m.attachmentType || "").toLowerCase();
-
-  // ✅ system message (yellow bar)
-  const isSystemMessage =
-    text.toLowerCase().includes("messages and calls are end-to-end encrypted");
-
-  if (isSystemMessage) {
-    html += `<div class="sysmsg">🔒 ${esc(text)}</div>`;
-    continue;
-  }
-
-  let content = "";
-
-  // sender label (only for incoming)
-  if (!outgoing && sender) {
-    content += `<div class="sender">${esc(sender)}</div>`;
-  }
-
-  // attachment render (no filename)
-  if (attachName) {
-    const upId = data?.uploadId || null;
-    const url = mediaUrl(upId, attachName);
-
-    if (!url) {
-      content += `<div class="txt">(attachment)</div>`;
-    } else if (attachType === "image") {
-      content += `<img class="imgmsg" src="${url}" alt="" loading="lazy" />`;
-    } else if (attachType === "audio") {
-      content += `
-        <audio class="audiomsg" controls preload="none">
-          <source src="${url}">
-          Your browser does not support audio playback.
-        </audio>
-      `;
-    } else {
-      content += `<div class="txt"><a href="${url}" target="_blank" rel="noopener">Open file</a></div>`;
-    }
-
-    if (text) content += `<div style="height:6px"></div>`;
-  }
-
-  // text render
-  if (text) {
-    content += `<div class="txt">${esc(text)}</div>`;
-  }
-
-  if (!content) {
-    content = `<div class="txt" style="color:#777">(empty)</div>`;
-  }
-
-  html += `
-    <div class="msg ${side}">
-      <div class="bubble">
-        ${content}
-        <div class="meta">
-          <span class="who">${outgoing ? "You" : esc(sender)}</span>
-          <span>${esc(fmtTime(ts))}</span>
-        </div>
-      </div>
-    </div>
-  `;
+// sender label for incoming group messages (optional)
+if (!outgoing && sender) {
+  content += `<div class="sender">${esc(sender)}</div>`;
 }
+
+if (attachName) {
+  const upId = data?.uploadId || null;
+  const url = mediaUrl(upId, attachName);
+  const t = (attachType || "").toLowerCase();
+
+  // If no url (user uploaded .txt), we can't serve media
+  if (!url) {
+    content += `<div class="txt">(attachment)</div>`;
+  } else if (t === "image") {
+    // ✅ WhatsApp-like: just the image
+    content += `<img class="imgmsg" src="${url}" alt="" loading="lazy" />`;
+  } else if (t === "audio") {
+    // ✅ WhatsApp-like: just the audio player
+    content += `
+      <audio class="audiomsg" controls preload="none">
+        <source src="${url}">
+        Your browser does not support audio playback.
+      </audio>
+    `;
+  } else {
+    // ✅ Anything else: simple "Open file" link (no filename shown)
+    content += `<div class="txt"><a href="${url}" target="_blank" rel="noopener">Open file</a></div>`;
+  }
+
+  // optional spacing if message also has text
+  if (text) content += `<div style="height:6px"></div>`;
+}
+
+if (text) {
+  content += `<div class="txt">${esc(text)}</div>`;
+}
+
+if (!content) {
+  content = `<div class="txt" style="color:#777">(empty)</div>`;
+}
+
      html += `
   <div class="msg ${side}">
     <div class="bubble">
