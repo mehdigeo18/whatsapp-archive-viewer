@@ -12,9 +12,9 @@ RUN mvn -q -DskipTests clean package
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-COPY --from=build /app/target/app.jar /app/app.jar
+# copy whatever jar was built (robust)
+COPY --from=build /app/target/*.jar /app/app.jar
 
-ENV PORT=8080
 EXPOSE 8080
-
-CMD ["java", "-jar", "/app/app.jar"]
+ENV PORT=8080
+ENTRYPOINT ["java","-jar","/app/app.jar"]
